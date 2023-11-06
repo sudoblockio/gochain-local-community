@@ -1,0 +1,173 @@
+version: "3.7"
+x-common-env: &common-env
+  # ICON
+  ICON_NODE_SERVICE_URL: "${ICON_NODE_SERVICE_URL:-https://api.icon.community/api/v3}"
+  # Kafka
+  KAFKA_BROKER_URL: "kafka:9092"
+  KAFKA_BLOCKS_TOPIC: "icon-blocks"
+  KAFKA_PRODUCER_PARTITIONS: "1"
+  KAFKA_DEAD_MESSAGE_TOPIC: "icon-blocks-dead"
+  # Postgres
+  DB_DRIVER: "postgres"
+  DB_HOST: "postgres-main"
+  DB_PORT: "5432"
+  DB_USER: "${DB_USER:-icon}"
+  DB_PASSWORD: "${DB_PASSWORD:-iconchangeme}"
+  DB_DBNAME: "postgres"
+  DB_SSL_MODE: "disable"
+  DB_TIMEZONE: "UTC"
+  # Redis
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ""
+  REDIS_KEY_PREFIX: "icon_${NETWORK_NAME:-mainnet}_v2_"
+  REDIS_BLOCKS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_blocks"
+  REDIS_TRANSACTIONS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_transactions"
+  REDIS_LOGS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_logs"
+  REDIS_TOKEN_TRANSFERS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_token_transfers"
+
+x-contracts-env: &contracts-env
+  NAME: "contracts"
+  NETWORK_NAME: "${NETWORK_NAME:-mainnet}"
+  # Ports
+  PORT: "8001"
+  METRICS_PORT: "9401"
+  # Prefix
+  REST_PREFIX: "/api/v1"
+  HEALTH_PREFIX: "/health"
+  METRICS_PREFIX: "/metrics"
+  CORS_ALLOW_ORIGINS: "*"
+  # Kafka
+  KAFKA_BROKER_URL: "kafka:9092"
+  CONSUMER_GROUP: "contracts-consumer-group"
+  CONSUMER_TOPIC_BLOCKS: "icon-blocks"
+  PRODUCER_TOPIC_CONTRACTS: "icon-contracts"
+  CONSUMER_AUTO_OFFSET_RESET: "earliest"
+  # DB
+  POSTGRES_USER: "${POSTGRES_USER:-icon}"
+  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-iconchangeme}"
+  POSTGRES_SERVER: "postgres-contracts"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DATABASE: "${POSTGRES_DATABASE-postgres}"
+  # Endpoints
+  MAX_PAGE_SIZE: "100"
+  # Application features
+  ENABLE_CONTRACT_VERIFICATION: "false"
+
+services:
+  extractor:
+    image: sudoblock/icon-extractor:latest
+    restart: always
+    environment:
+      <<: *common-env
+      API_PORT: "9876"
+      START_CLAIM_EXTRACTORS: "false"
+      START_HEAD_EXTRACTOR: "true"
+      HEAD_EXTRACTOR_START_BLOCK: "1"
+      INSERT_EXTRACTOR_JOB: "false"
+      ICON_NODE_SERVICE_MAX_BATCH_SIZE: "1"
+
+  transformer:
+    image: sudoblock/icon-transformer:latest
+    restart: always
+    environment:
+      <<: *common-env
+      ROUTINES_RUN_ONLY: "false"
+
+  api:
+    image: sudoblock/icon-go-api:latest
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *common-env
+      API_PORT: "8000"
+
+  contracts-worker:
+    image: sudoblock/icon-contracts-worker:latest
+    restart: always
+    environment:
+      <<: *contracts-env
+
+  contracts-api:
+    image: sudoblock/icon-contracts-api:latest
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      <<: *contracts-env
+
+  postgres-main:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-icon}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-iconchangeme}
+#    expose:
+#      - 5432
+  # Uncomment for external access
+    ports:
+        - "5432:5432"
+#  # Uncomment for persistence
+#    volumes:
+#      - ${DB_CONTEXT:-.}/volumes/postgres:/data/postgres
+  postgres-contracts:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-icon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iconchangeme}
+    expose:
+      - 5432
+#  # Uncomment for external access
+#    ports:
+#        - "5433:5432"
+#  # Uncomment for persistence
+#    volumes:
+#      - /volumes/postgres:/data/postgres
+  redis:
+    image: redis:latest
+#  # Uncomment for persistence
+#    volumes:
+#      - /volumes/redis:/data
+  zookeeper:
+    image: confluentinc/cp-zookeeper:${CP_ZOOKEEPER_TAG:-latest}
+    hostname: zookeeper
+    environment:
+      zk_id: "1"
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-server:7.2.0
+    hostname: kafka
+    depends_on:
+      - zookeeper
+#  # Uncomment for persistence
+#    volumes:
+#      - /volumes/redis:/var/lib/kafka/data
+# Internal
+    expose:
+      - 9092
+# External - Only for development
+#    ports:
+#      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_BROKER_RACK: "r1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_SCHEMA_REGISTRY_URL: "schemaregistry:8081"
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: "schemaregistry:8081"
+      KAFKA_JMX_PORT: 9991
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_CONFLUENT_SUPPORT_CUSTOMER_ID: anonymous
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1

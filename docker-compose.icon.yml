@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  gochain:
+#    container_name: gochain-iconee
+    image: goloop/gochain:latest
+    volumes:
+#      - ./data:/goloop/data
+      - ./config:/goloop/gov/config
+#      - ./chain:/goloop/chain
+    ports:
+      - "9082:9082"
+    environment:
+      GOCHAIN_CONFIG: "${GOCHAIN_CONFIG:-/goloop/config/gov/config.json}"
+      GOCHAIN_GENESIS: "${GOCHAIN_GENESIS:-/goloop/config/gov/genesis.json}"
+      ICON_CONFIG: "${ICON_CONFIG:-/goloop/config/gov/icon_config.json}"
+      GOCHAIN_DATA: "${GOCHAIN_DATA:-/goloop/chain/iconee}"
+      GOCHAIN_LOGFILE: "${GOCHAIN_LOGFILE:-/goloop/chain/iconee.log}"
+      GOCHAIN_DB_TYPE: "${GOCHAIN_DB_TYPE:-rocksdb}"
+      GOCHAIN_CLEAN_DATA: "${GOCHAIN_CLEAN_DATA:-true}"
+      JAVAEE_BIN: "${JAVAEE_BIN:-/goloop/execman/bin/execman}"
+      PYEE_VERIFY_PACKAGE: "${PYEE_VERIFY_PACKAGE:-true}"
