@@ -1,0 +1,10 @@
+.idea
+.vscode
+
+data/auth.json
+data/cli.sock
+data/ee.sock
+data/rconfig.json
+
+chain/*
+!chain/.gitkeep
