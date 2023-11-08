@@ -1,14 +1,22 @@
 # ICON Local Tracker
 
+http://localhost:3000/?api_endpoint=http://localhost:8000&rpc_endpoint=http://localhost:9080/api/v3?wss_endpoint=ws://localhost:8000
+
 WIP 
 
 - [x] Get tracker stack to come up and index mainnet 
 - [x] Point tracker to custom chain and and support indexes
 - [x] Modify frontend to support custom backends 
-- [ ] Support creating a local custom chain 
-  - [ ] Contrib CI to push goloop containers to docker hub 
-    - Pending review 
-  - [x] Document locally building gochain
+
+### Issues 
+
+- [x] Extractor is jamming up 
+  - Issue is the blocks are coming in chunks 
+  - Running locally / stepping through code isn't revealing anything 
+- [ ] Websockets not working 
+- [ ] Setup local frontend with build variables 
+- [ ] Document how this is for local testnets only 
+
 
 ### Building Goloop from Source 
 
