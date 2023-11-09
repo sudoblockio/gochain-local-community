@@ -8,3 +8,6 @@ data/rconfig.json
 
 chain/*
 !chain/.gitkeep
+
+nginx/access.log
+nginx/error.log
