@@ -16,6 +16,8 @@ docker-compose \
 up -d
 ```
 
+Navigate to http://localhost to view the tracker. Will take about 15 seconds to start up. 
+
 ### Running Other Networks 
 
 Modify the `.env` file to point to other networks.  
