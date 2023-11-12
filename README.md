@@ -18,7 +18,7 @@ up -d
 
 ### Running Other Networks 
 
-Modify the `.env` file to poin to other networks. 
+Modify the `.env` file to point to other networks.  
 
 ### Additional Resources 
 
