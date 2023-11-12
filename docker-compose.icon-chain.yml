@@ -1,0 +1,17 @@
+version: "3"
+services:
+  icon:
+    image: iconloop/goloop-icon:v1.3.8
+    environment:
+      GOLOOP_LOG_LEVEL: "trace"
+      ICON_CONFIG: "/goloop/config/icon_config.json"
+    cap_add:
+      - SYS_TIME
+    ports:
+      - 9080:9080
+      - 7080:7080
+    volumes:
+      - ./icon-chain/config:/goloop/config
+      - ./icon-chain/data:/goloop/data
+      - ./icon-chain/logs:/goloop/logs
+    command: /bin/sh -c /goloop/config/start.sh

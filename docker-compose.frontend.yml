@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: icon-tracker-frontend
+      args:
+        REACT_APP_NETWORK_NAME: http://localhost
+        REACT_APP_RPC_ENDPOINT: http://localhost
+        REACT_APP_API_ENDPOINT: http://localhost
+        REACT_APP_WSS_ENDPOINT: ws://localhost
+        REACT_APP_NID: 3
+    ports:
+      - "8080:8080"

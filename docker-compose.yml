@@ -1,4 +1,5 @@
 version: "3.7"
+
 x-common-env: &common-env
   # ICON
   ICON_NODE_SERVICE_URL: "${ICON_NODE_SERVICE_URL:-https://api.icon.community/api/v3}"
@@ -9,50 +10,45 @@ x-common-env: &common-env
   KAFKA_DEAD_MESSAGE_TOPIC: "icon-blocks-dead"
   # Postgres
   DB_DRIVER: "postgres"
-  DB_HOST: "postgres-main"
+  DB_HOST: "postgres"
   DB_PORT: "5432"
   DB_USER: "${DB_USER:-icon}"
   DB_PASSWORD: "${DB_PASSWORD:-iconchangeme}"
   DB_DBNAME: "postgres"
-  DB_SSL_MODE: "disable"
-  DB_TIMEZONE: "UTC"
   # Redis
   REDIS_HOST: "redis"
-  REDIS_PORT: "6379"
-  REDIS_PASSWORD: ""
-  REDIS_KEY_PREFIX: "icon_${NETWORK_NAME:-mainnet}_v2_"
-  REDIS_BLOCKS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_blocks"
-  REDIS_TRANSACTIONS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_transactions"
-  REDIS_LOGS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_logs"
-  REDIS_TOKEN_TRANSFERS_CHANNEL: "icon_${NETWORK_NAME:-mainnet}_v2_token_transfers"
 
 x-contracts-env: &contracts-env
-  NAME: "contracts"
-  NETWORK_NAME: "${NETWORK_NAME:-mainnet}"
+  COMMUNITY_API_ENDPOINT: "${COMMUNITY_API_ENDPOINT:-https://tracker.icon.community}"
+  ICON_NODE_URL: "${ICON_NODE_URL:-https://api.icon.community/api/v3}"
   # Ports
   PORT: "8001"
   METRICS_PORT: "9401"
-  # Prefix
-  REST_PREFIX: "/api/v1"
-  HEALTH_PREFIX: "/health"
-  METRICS_PREFIX: "/metrics"
-  CORS_ALLOW_ORIGINS: "*"
-  # Kafka
-  KAFKA_BROKER_URL: "kafka:9092"
-  CONSUMER_GROUP: "contracts-consumer-group"
-  CONSUMER_TOPIC_BLOCKS: "icon-blocks"
-  PRODUCER_TOPIC_CONTRACTS: "icon-contracts"
-  CONSUMER_AUTO_OFFSET_RESET: "earliest"
   # DB
   POSTGRES_USER: "${POSTGRES_USER:-icon}"
   POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-iconchangeme}"
   POSTGRES_SERVER: "postgres-contracts"
   POSTGRES_PORT: "5432"
   POSTGRES_DATABASE: "${POSTGRES_DATABASE-postgres}"
-  # Endpoints
-  MAX_PAGE_SIZE: "100"
+  # Kafka
+  KAFKA_BROKER_URL: "kafka:9092"
+  CONSUMER_TOPIC_BLOCKS: "icon-blocks"
+  CONSUMER_AUTO_OFFSET_RESET: "earliest"
   # Application features
   ENABLE_CONTRACT_VERIFICATION: "false"
+
+x-governance-env: &governance-env
+  COMMUNITY_API_ENDPOINT: "${COMMUNITY_API_ENDPOINT:-https://tracker.icon.community}"
+  ICON_NODE_URL: "${ICON_NODE_URL:-https://api.icon.community/api/v3}"
+  # Ports
+  PORT: "8002"
+  METRICS_PORT: "9402"
+  # DB
+  POSTGRES_USER: "${POSTGRES_USER:-icon}"
+  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-iconchangeme}"
+  POSTGRES_SERVER: "postgres-governance"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DATABASE: "${POSTGRES_DATABASE-postgres}"
 
 services:
   extractor:
@@ -61,6 +57,7 @@ services:
     environment:
       <<: *common-env
       API_PORT: "9876"
+      MAX_CLAIM_SIZE: 1
       START_CLAIM_EXTRACTORS: "false"
       START_HEAD_EXTRACTOR: "true"
       HEAD_EXTRACTOR_START_BLOCK: "1"
@@ -86,6 +83,7 @@ services:
   contracts-worker:
     image: sudoblock/icon-contracts-worker:latest
     restart: always
+    command: worker
     environment:
       <<: *contracts-env
 
@@ -97,37 +95,58 @@ services:
     environment:
       <<: *contracts-env
 
-  postgres-main:
+  governance-worker:
+    image: sudoblock/icon-governance-worker:latest
+    restart: always
+    command: worker cron
+    environment:
+      <<: *governance-env
+
+  governance-api:
+    image: sudoblock/icon-governance-api:latest
+    restart: always
+    command: api
+    ports:
+      - "8002:8002"
+    environment:
+      <<: *governance-env
+
+  postgres:
     image: postgres
     environment:
       POSTGRES_USER: ${DB_USER:-icon}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-iconchangeme}
-#    expose:
-#      - 5432
-  # Uncomment for external access
-    ports:
-        - "5432:5432"
-#  # Uncomment for persistence
-#    volumes:
-#      - ${DB_CONTEXT:-.}/volumes/postgres:/data/postgres
+    expose:
+      - 5432
+
   postgres-contracts:
     image: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-icon}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iconchangeme}
+      POSTGRES_USER: ${DB_USER:-icon}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-iconchangeme}
     expose:
       - 5432
+
+  postgres-governance:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-icon}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-iconchangeme}
+    expose:
+      - 5432
+
 #  # Uncomment for external access
 #    ports:
-#        - "5433:5432"
+#        - "5432:5432"
 #  # Uncomment for persistence
 #    volumes:
-#      - /volumes/postgres:/data/postgres
+#      - postgres/volumes/postgres:/data/postgres
+
   redis:
-    image: redis:latest
-#  # Uncomment for persistence
-#    volumes:
-#      - /volumes/redis:/data
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
   zookeeper:
     image: confluentinc/cp-zookeeper:${CP_ZOOKEEPER_TAG:-latest}
     hostname: zookeeper
@@ -142,7 +161,7 @@ services:
       - zookeeper
 #  # Uncomment for persistence
 #    volumes:
-#      - /volumes/redis:/var/lib/kafka/data
+#      - /kafka:/var/lib/kafka/data
 # Internal
     expose:
       - 9092
@@ -161,8 +180,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_DELETE_TOPIC_ENABLE: "true"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_SCHEMA_REGISTRY_URL: "schemaregistry:8081"
-      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: "schemaregistry:8081"
       KAFKA_JMX_PORT: 9991
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_SUPPORT_CUSTOMER_ID: anonymous
