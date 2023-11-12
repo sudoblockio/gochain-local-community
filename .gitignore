@@ -1,13 +1,9 @@
 .idea
 .vscode
 
-data/auth.json
-data/cli.sock
-data/ee.sock
-data/rconfig.json
-
-chain/*
-!chain/.gitkeep
+icon-tracker-frontend
+icon-chain/data
+icon-chain/logs
 
 nginx/access.log
 nginx/error.log

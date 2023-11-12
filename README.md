@@ -1,32 +1,29 @@
 # ICON Local Tracker
 
-http://localhost:3000/?api_endpoint=http://localhost:8000&rpc_endpoint=http://localhost:9080/api/v3?wss_endpoint=ws://localhost:8000
+Local version of the [ICON Community Tracker](https://tracker.icon.community/) running with a custom ICON chain. 
 
-WIP 
+### Quick Start
 
-- [x] Get tracker stack to come up and index mainnet 
-- [x] Point tracker to custom chain and and support indexes
-- [x] Modify frontend to support custom backends 
+Install docker and docker-compose
 
-### Issues 
+```shell
+git clone https://github.com/sudoblockio/icon-tracker-frontend
+docker-compose \
+-f docker-compose.yml \
+-f docker-compose.icon-chain.yml \
+-f docker-compose.nginx.yml \
+-f docker-compose.frontend.yml \
+up -d
+```
 
-- [x] Extractor is jamming up 
-  - Issue is the blocks are coming in chunks 
-  - Running locally / stepping through code isn't revealing anything 
-- [ ] Websockets not working 
-- [ ] Setup local frontend with build variables 
-- [ ] Document how this is for local testnets only 
+### Running Other Networks 
 
-
-### Building Goloop from Source 
-
-You can run a custom version of goloop by building it from source. 
-
-- Clone goloop - `git clone https://github.com/icon-project/goloop`
-- `cd goloop && make make gochain-icon-image`
-
-The resulting image will be tagged `goloop/gochain:latest` 
+Modify the `.env` file to poin to other networks. 
 
 ### Additional Resources 
 
 - [gochain-local](https://github.com/icon-project/gochain-local)
+
+### License 
+
+Apache 2.0 
