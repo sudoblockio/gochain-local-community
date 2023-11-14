@@ -1,9 +1,17 @@
 .idea
 .vscode
 
+# Repos
 icon-tracker-frontend
+goloop
+
+# Chain data
 icon-chain/data
 icon-chain/logs
 
+# nginx
 nginx/access.log
 nginx/error.log
+
+# Default wallet
+./keystore.json
