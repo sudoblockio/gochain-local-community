@@ -13,8 +13,12 @@ All the commands needed to do the following can be done with make:
 5. Fund that keystore
 
 > Dependencies:
-> docker / docker-compose
-> rocksdb -> `brew install rocksdb` (macOS) or `sudo apt-get install librocksdb-dev` (Ubuntu)
+> 
+> 1. docker / docker-compose
+> 
+> 2. rocksdb 
+>   - `brew install rocksdb` (macOS) 
+>   - `sudo apt-get install librocksdb-dev libsnappy-dev` (Ubuntu)
 
 One click:
 
