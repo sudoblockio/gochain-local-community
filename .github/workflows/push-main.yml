@@ -13,10 +13,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run all make stuff
-        run: |
-          make clone-dependencies 
-          make up-stack
-          sleep 15
-          make install-goloop
-          make create-wallet
-          make fund-wallet
+        run: make all

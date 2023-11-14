@@ -46,7 +46,11 @@ clean:  ## Delete the state of the chain
 	rm -rf icon-chain/data
 	echo "Cleaned up..."
 
-all: clone-dependencies install-goloop up-stack create-wallet fund-wallet  ## All the things
+wait-for-stack:
+	echo Waiting for stack to come up
+	sleep 15
+
+all: clone-dependencies install-goloop up-stack wait-for-stack create-wallet fund-wallet  ## All the things
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'

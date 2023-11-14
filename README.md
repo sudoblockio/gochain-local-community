@@ -14,22 +14,23 @@ All the commands needed to do the following can be done with make:
 
 > Note: You will need to have docker / docker-compose installed 
 
+One click:
+
 ```shell
-make   # Shows help screen 
-make all  # Does all the commands
+make all
 ```
 
-Navigate to http://localhost to view the tracker. Will take about 15 seconds to start up.
-
-Or individually:
+Individual steps:
 
 ```shell
+make  # Shows help screen 
 make clone-dependencies 
 make up-stack
 make install-goloop
 make create-wallet
 make fund-wallet
 ```
+Navigate to http://localhost to view the tracker. Will take about 15 seconds to start up.
 
 Note that you can create / fund a different wallet with the following:
 
