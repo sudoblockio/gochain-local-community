@@ -12,5 +12,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install rocksdb
+        run: sudo apt-get install librocksdb-dev
+
       - name: Run all make stuff
         run: make all

@@ -12,7 +12,9 @@ All the commands needed to do the following can be done with make:
 4. Create a keystore
 5. Fund that keystore
 
-> Note: You will need to have docker / docker-compose installed 
+> Dependencies:
+> docker / docker-compose
+> rocksdb -> `brew install rocksdb` (macOS) or `sudo apt-get install librocksdb-dev` (Ubuntu)
 
 One click:
 
