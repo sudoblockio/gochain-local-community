@@ -19,6 +19,10 @@ All the commands needed to do the following can be done with make:
 > 2. rocksdb 
 >   - `brew install rocksdb` (macOS) 
 >   - `sudo apt-get install librocksdb-dev libsnappy-dev` (Ubuntu)
+>
+> 3. go 
+>   - `brew install golang` (macOS) 
+>   - Google it... (Ubuntu)
 
 One click:
 
