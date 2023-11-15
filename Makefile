@@ -25,6 +25,9 @@ down-stack:  ## Bring down the stack without deleting volumes
 	-f docker-compose.frontend.yml \
 	down
 
+enable-debug:
+	@docker-compose -f docker-compose.icon-chain.yml exec icon goloop system config rpcIncludeDebug true
+
 install-goloop:  ## Install goloop
 	cd goloop && $(MAKE) goloop
 
@@ -50,7 +53,7 @@ wait-for-stack:
 	echo Waiting for stack to come up
 	sleep 15
 
-all: clone-dependencies install-goloop up-stack wait-for-stack create-wallet fund-wallet  ## All the things
+all: clone-dependencies install-goloop up-stack wait-for-stack enable-debug create-wallet fund-wallet  ## All the things
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'

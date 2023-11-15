@@ -36,6 +36,7 @@ Individual steps:
 make  # Shows help screen 
 make clone-dependencies 
 make up-stack
+make enable-debug
 make install-goloop
 make create-wallet
 make fund-wallet
@@ -64,6 +65,11 @@ up -d
 
 To take it down subsitute `up -d` with `down` or to remove the volumes `down -v`.
 
+Enable debug mode on ICON node
+```shell
+docker-compose -f docker-compose.icon-chain.yml exec icon goloop system config rpcIncludeDebug true
+```
+
 Installing goloop
 ```shell
 git clone https://github.com/icon-project/goloop
@@ -72,8 +78,7 @@ make goloop
 cd ..
 ```
 
-Creating wallet 
-
+Creating wallet
 ```shell
 ./goloop/bin/goloop ks gen -o your_wallet_name.json -p yoursupersecret
 ```
