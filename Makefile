@@ -26,7 +26,7 @@ down-stack:  ## Bring down the stack without deleting volumes
 	down
 
 enable-debug:
-	@docker-compose -f docker-compose.icon-chain.yml exec icon goloop system config rpcIncludeDebug true
+	@docker-compose -f docker-compose.icon-chain.yml exec -T icon goloop system config rpcIncludeDebug true
 
 install-goloop:  ## Install goloop
 	cd goloop && $(MAKE) goloop
