@@ -71,7 +71,6 @@ wait-for-stack:
 	    sleep 5; \
 	done
 
-
 all: clone-dependencies install-goloop up-stack wait-for-stack enable-debug create-wallet fund-wallet  ## All the things
 
 help:
