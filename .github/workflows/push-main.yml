@@ -17,3 +17,17 @@ jobs:
 
       - name: Run all make stuff
         run: make all
+
+      - name: Check 200 on port
+        run: |
+          # Wait for stack to come up 
+          sleep 30
+          # Perform the request and extract the status code
+          status_code=$(curl -o /dev/null -s -w "%{http_code}\n" "http://localhost")
+          # Check if the status code is 200
+          if [ "$status_code" -eq 200 ]; then
+              echo "Success: HTTP status code is 200"
+          else
+              echo "Failure: HTTP status code is not 200, it's $status_code"
+              exit 1
+          fi
