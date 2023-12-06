@@ -50,8 +50,27 @@ clean:  ## Delete the state of the chain
 	echo "Cleaned up..."
 
 wait-for-stack:
-	echo Waiting for stack to come up
-	sleep 15
+	@port=9080; \
+	timeout=120; \
+	start_time=$$(date +%s); \
+	while true; do \
+	    current_time=$$(date +%s); \
+	    elapsed=$$(( current_time - start_time )); \
+	    if [ $$elapsed -ge $$timeout ]; then \
+	        echo "Timeout reached. Exiting."; \
+	        exit 1; \
+	    fi; \
+	    nc -z localhost $$port; \
+	    if [ $$? -eq 0 ]; then \
+	        echo "Port $$port is available."; \
+	        sleep 5
+	        exit 0; \
+	    else \
+	        echo "Port $$port is not available yet. Retrying..."; \
+	    fi; \
+	    sleep 5; \
+	done
+
 
 all: clone-dependencies install-goloop up-stack wait-for-stack enable-debug create-wallet fund-wallet  ## All the things
 
