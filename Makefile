@@ -17,6 +17,14 @@ up-stack:  ## Bring up the stack
 	-f docker-compose.frontend.yml \
 	up -d
 
+rebuild-frontend:  ## Rebuild the frontend
+	docker compose \
+	-f docker-compose.frontend.yml \
+	build && \
+	docker compose \
+	-f docker-compose.frontend.yml \
+	up -d
+
 down-stack:  ## Bring down the stack without deleting volumes
 	docker compose \
 	-f docker-compose.yml \
