@@ -6,11 +6,11 @@ GOD_WALLET_PATH ?= icon-chain/config/keystore.json
 GOD_WALLET_PASSWORD ?= gochain
 
 clone-dependencies:  ## Clone all the dependencies
-	git clone https://github.com/sudoblockio/icon-tracker-frontend
-	git clone https://github.com/icon-project/goloop
+	@test -d icon-tracker-frontend || git clone https://github.com/sudoblockio/icon-tracker-frontend
+	@test -d goloop || git clone https://github.com/icon-project/goloop
 
 up-stack:  ## Bring up the stack
-	docker-compose \
+	docker compose \
 	-f docker-compose.yml \
 	-f docker-compose.icon-chain.yml \
 	-f docker-compose.nginx.yml \
@@ -18,7 +18,7 @@ up-stack:  ## Bring up the stack
 	up -d
 
 down-stack:  ## Bring down the stack without deleting volumes
-	docker-compose \
+	docker compose \
 	-f docker-compose.yml \
 	-f docker-compose.icon-chain.yml \
 	-f docker-compose.nginx.yml \
@@ -26,7 +26,7 @@ down-stack:  ## Bring down the stack without deleting volumes
 	down
 
 enable-debug:
-	@docker-compose -f docker-compose.icon-chain.yml exec -T icon goloop system config rpcIncludeDebug true
+	@docker compose -f docker-compose.icon-chain.yml exec -T icon goloop system config rpcIncludeDebug true
 
 install-goloop:  ## Install goloop
 	cd goloop && $(MAKE) goloop
