@@ -96,9 +96,13 @@ Funding wallet with 1000 ICX (note - jq command just pulls address from wallet).
 --key_store ./icon-chain/config/keystore.json
 ```
 
+### Running Non-Local Deployments 
+
+This guide assumes you are running this all locally and should get a tracker with chain running one-click (please file and issue with logs if you have issues). If you are running on a server, you will need to **build** the frontend so that it points directly to your server's IP or backend by updating the `args` in [docker-compose.frontend.yml](docker-compose.frontend.yml) to your IP or URL if you are running your own reverse proxy. With react and other frameworks, you can't inject these parameters at runtime and thus they need to be hardcoded. For the actual tracker [we do some other stuff](https://github.com/sudoblockio/icon-tracker-frontend/blob/main/src/config.js#L6) to deal with this issue as we have to run the frontend pointing at many different backends and so this is the only way [for now](https://github.com/sudoblockio/icon-tracker-frontend/pull/355).
+
 ### Running Other Networks 
 
-Modify the `.env` file to point to other networks.  
+If you don't want to create your own local chain and instead want to simply run a custom tracker on an existing network, omit the `docker-compose.icon-chain.yml` in the makefile commands and modify the `.env` file to point to other networks. This will still make the frontend **only** accessible on localhost. To serve that frontend beyond localhost, see the above. 
 
 ### Additional Resources 
 
